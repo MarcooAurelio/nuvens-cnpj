@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Página com pesquisa CNPJ</title>
+</head>
+<body>
+    
+    <script>
+    
+    function limpa_formulario_cnpj() {
+           
+            document.getElementById('razaoSocial').value=("");
+            document.getElementById('nomeFantasia').value=("");
+            document.getElementById('logradouro').value=("");
+            document.getElementById('bairro').value=("");
+            document.getElementById('municipio').value=("");
+            document.getElementById('uf').value=("");
+            document.getElementById('cep').value=("");
+    }
+
+    function exibir_resultado_cnpj(data) {
+        if (data.status === "OK") {
+           
+            document.getElementById('razaoSocial').value = data.nome;
+            document.getElementById('nomeFantasia').value = data.fantasia;
+            document.getElementById('logradouro').value = data.logradouro;
+            document.getElementById('bairro').value = data.bairro;
+            document.getElementById('municipio').value = data.municipio;
+            document.getElementById('uf').value = data.uf;
+            document.getElementById('cep').value = data.cep;
+        } else {
+           
+            limpa_formulario_cnpj();
+            alert("CNPJ não encontrado.");
+        }
+    }
+        
+    function pesquisar_cnpj(cnpj) {
+       
+        var url = 'https://cors-anywhere.herokuapp.com/https://www.receitaws.com.br/v1/cnpj/' + cnpj;
+
+        fetch(url )
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Erro ao obter informações do CNPJ. Código do status: ' + response.status);
+                }
+                return response.text(); 
+            })
+            .then(data => {
+              
+                if (data.trim().length > 0) {
+                  
+                    try {
+                        const jsonData = JSON.parse(data);
+                        exibir_resultado_cnpj(jsonData);
+                    } catch (error) {
+                        console.error('Erro ao analisar resposta JSON:', error);
+                        alert("Erro ao obter informações do CNPJ. Por favor, tente novamente mais tarde.");
+                    }
+                } else {
+                    console.error('Resposta vazia ou inválida.');
+                    alert("Erro ao obter informações do CNPJ. Resposta vazia ou inválida.");
+                }
+            })
+            .catch(error => {
+                console.error('Erro na solicitação:', error);
+                alert("Erro ao obter informações do CNPJ. Por favor, tente novamente mais tarde.");
+            });
+    }
+    </script>
+    </head>
+
+    <body>
+   
+      <form method="get" action=".">
+        <label>CNPJ:
+        <input name="cnpj" type="text" id="cnpj" value="" size="14" maxlength="18"/></label><br />
+        <label>Razão Social:
+        <input name="razaoSocial" type="text" id="razaoSocial" size="60" /></label><br />
+        <label>Nome Fantasia:
+        <input name="nomeFantasia" type="text" id="nomeFantasia" size="40" /></label><br />
+        <label>Logradouro:
+        <input name="logradouro" type="text" id="logradouro" size="60" /></label><br />
+        <label>Bairro:
+        <input name="bairro" type="text" id="bairro" size="40" /></label><br />
+        <label>Município:
+        <input name="municipio" type="text" id="municipio" size="40" /></label><br />
+        <label>UF:
+        <input name="uf" type="text" id="uf" size="2" /></label><br />
+        <label>CEP:
+        <input name="cep" type="text" id="cep" size="10" maxlength="9" /></label><br />
+      </form>
+      <br>
+      <input type="button" value="Buscar CNPJ" onclick="pesquisar_cnpj(document.getElementById('cnpj').value)"/>
+</body>
+</html>
